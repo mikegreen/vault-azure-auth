@@ -47,6 +47,16 @@ resource "azurerm_subnet" "example" {
   address_prefixes     = ["10.2.2.0/24"]
 }
 
+
+resource "azurerm_public_ip" "dynamicip-rg" {
+  name                = "myPublicIP-rg"
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
+  allocation_method   = "Dynamic"
+
+  tags = var.common_tags
+}
+
 resource "azurerm_network_interface" "example-rg" {
   name                = "example-nic-vault-auth-rg"
   location            = azurerm_resource_group.example.location
@@ -56,12 +66,15 @@ resource "azurerm_network_interface" "example-rg" {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.example.id
     private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.dynamicip-rg.id
+
   }
   tags = var.common_tags
 }
 
-resource "azurerm_public_ip" "dynamicip" {
-  name                = "myPublicIP"
+
+resource "azurerm_public_ip" "dynamicip-ua" {
+  name                = "myPublicIP-ua"
   location            = azurerm_resource_group.example.location
   resource_group_name = azurerm_resource_group.example.name
   allocation_method   = "Dynamic"
@@ -78,17 +91,8 @@ resource "azurerm_network_interface" "example-ua" {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.example.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.dynamicip.id
+    public_ip_address_id          = azurerm_public_ip.dynamicip-ua.id
   }
-  tags = var.common_tags
-}
-
-resource "azurerm_public_ip" "dynamicip-ua" {
-  name                = "myPublicIP-ua"
-  location            = azurerm_resource_group.example.location
-  resource_group_name = azurerm_resource_group.example.name
-  allocation_method   = "Dynamic"
-
   tags = var.common_tags
 }
 

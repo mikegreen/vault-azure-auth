@@ -1,4 +1,4 @@
-# vault-azure-auth
+# vault-azure-auth-ua-identity
 
 ## Scope
 
