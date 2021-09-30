@@ -96,7 +96,7 @@ resource "azurerm_linux_virtual_machine" "example-rg" {
   name                = "example-machine-in-rg"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
-  size                = "Standard_F2"
+  size                = "Standard_A1_v2"
   admin_username      = "adminuser"
   network_interface_ids = [
     azurerm_network_interface.example-rg.id,
@@ -125,7 +125,7 @@ resource "azurerm_linux_virtual_machine" "example-ua" {
   name                = "example-machine-in-ua"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
-  size                = "Standard_F2"
+  size                = "Standard_A1_v2"
   admin_username      = "adminuser"
   network_interface_ids = [
     azurerm_network_interface.example-ua.id,
