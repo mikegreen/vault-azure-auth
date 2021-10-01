@@ -2,7 +2,11 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "=2.46.0"
+      version = "~>2.46"
+    }
+    vault = {
+      source  = "hashicorp/vault"
+      version = "~>2.2"
     }
   }
 }
@@ -122,10 +126,15 @@ resource "azurerm_linux_virtual_machine" "example-rg" {
     sku       = "18.04-LTS"
     version   = "latest"
   }
+
+  identity {
+    type = "SystemAssigned"
+  }
+
   tags = var.common_tags
 }
 
-resource "azurerm_linux_virtual_machine" "example-ua" {
+resource "azurerm_linux_virtual_machine" "example-ua" { # 39196f8c-6a93-4010-abcd-50ddc93e52bf
   name                = "example-machine-in-ua"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
@@ -153,7 +162,7 @@ resource "azurerm_linux_virtual_machine" "example-ua" {
   }
 
   identity {
-    type         = "UserAssigned"
+    type         = "SystemAssigned, UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.example.id]
   }
   tags = var.common_tags
