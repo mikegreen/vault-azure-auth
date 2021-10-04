@@ -10,8 +10,14 @@
 
 ### Auth
 
+#### Resource group auth example
+
 ```
-$ vault write auth/azure-ua-demo/login role="test-role-rg"      jwt="$(curl -s 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2021-05-01&resource=https%3A%2F%2Fmanagement.azure.com%2F' -H Metadata:true | jq -r '.access_token')"      subscription_id=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2021-05-01" | jq -r '.compute | .subscriptionId')       resource_group_name=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-08-01" | jq -r '.compute | .resourceGroupName')      vm_name=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-08-01" | jq -r '.compute | .name')
+$ vault write auth/azure-ua-demo/login role="test-role-rg" \
+      jwt="$(curl -s 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2021-05-01&resource=https%3A%2F%2Fmanagement.azure.com%2F' -H Metadata:true | jq -r '.access_token')" \
+      subscription_id=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2021-05-01" | jq -r '.compute | .subscriptionId') \
+      resource_group_name=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-08-01" | jq -r '.compute | .resourceGroupName')  \
+      vm_name=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-08-01" | jq -r '.compute | .name')
 ```
 
 
@@ -30,3 +36,38 @@ token_meta_role                   test-role-rg
 token_meta_subscription_id        02d0e06b-ed9d-4ca5-bb9f-0a0243a9c9f2
 token_meta_vm_name                example-machine-in-rg
 ```
+
+#### User assigned identity auth example
+
+In the JWT call, the client_id is the value from the `vault-azure-auth-demo-identity` Managed Identity.
+
+```
+$ vault write auth/azure-ua-demo/login role="test-role-ua"   \
+   jwt="$(curl -s 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2021-05-01&resource=https%3A%2F%2Fmanagement.azure.com%2F&client_id=a1155420-e142-4acd-a7a2-9239eae6f061' -H Metadata:true | jq -r '.access_token')"  \ 
+   subscription_id=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2021-05-01" | jq -r '.compute | .subscriptionId')  \     
+   resource_group_name=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-08-01" | jq -r '.compute | .resourceGroupName')      \
+   vm_name=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-08-01" | jq -r '.compute | .name')
+```
+
+```
+Key                               Value
+---                               -----
+token                             s.cOyun123123RQnlhsqe1K9r
+token_accessor                    71234PAl6pfQ0dzTL1QwfTU
+token_duration                    10m
+token_renewable                   true
+token_policies                    ["default" "user-assigned-policy"]
+identity_policies                 []
+policies                          ["default" "user-assigned-policy"]
+token_meta_role                   test-role-ua
+token_meta_subscription_id        02d0e06b-ed9d-4ca5-bb9f-0a0243a9c9f2
+token_meta_vm_name                example-machine-in-ua
+token_meta_resource_group_name    example-resource-group
+```
+
+### Troubleshooting
+
+`token object id does not match virtual machine identities`
+This error indicates the `ua` VM has both a system assigned managed identity and a user assigned identity. 
+Remove the system assigned managed identity. 
+

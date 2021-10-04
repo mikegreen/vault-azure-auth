@@ -15,12 +15,18 @@ provider "azurerm" {
   features {}
 }
 
+data "azurerm_subscription" "current" {
+}
+
 variable "common_tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
   default     = { "owner" = "mike-green", "managed_by" = "terraform", "deleteable" = "yes" }
 }
 
+variable "azure_ent_app_object_id" {
+  type = string
+}
 
 resource "azurerm_resource_group" "example" {
   name     = "example-resource-group"
@@ -201,4 +207,27 @@ resource "azurerm_linux_virtual_machine" "example-ua" { # 39196f8c-6a93-4010-abc
     identity_ids = [azurerm_user_assigned_identity.example.id]
   }
   tags = var.common_tags
+}
+
+resource "azurerm_role_definition" "vault-vm-read" {
+  name        = "vault-vm-read"
+  scope       = data.azurerm_subscription.current.id
+  description = "Vault server role to do Azure auth"
+  permissions {
+    actions = [
+      "Microsoft.Compute/virtualMachines/*/read",
+      "Microsoft.Compute/virtualMachineScaleSets/*/read"
+    ]
+    not_actions = []
+  }
+  assignable_scopes = [
+    azurerm_resource_group.example.id,
+  ]
+}
+
+resource "azurerm_role_assignment" "example" {
+  # name  = "00000000-0000-0000-0000-000000000000"
+  scope                = azurerm_resource_group.example.id
+  role_definition_name = azurerm_role_definition.vault-vm-read.name
+  principal_id         = var.azure_ent_app_object_id
 }

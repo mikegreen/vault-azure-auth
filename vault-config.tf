@@ -26,12 +26,14 @@ variable "azure_client_secret" {
   description = ""
 }
 
+# Create a Client Secret from Azure in "Certificates & secrets"
 resource "vault_azure_auth_backend_config" "example" {
   backend       = vault_auth_backend.example.path
   tenant_id     = var.azure_tenant_id
   client_id     = var.azure_client_id
   client_secret = var.azure_client_secret
-  resource      = "https://management.azure.com/"
+
+  resource = "https://management.azure.com/"
 }
 
 resource "vault_azure_auth_backend_role" "user-assigned-role" {
