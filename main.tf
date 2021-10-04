@@ -100,6 +100,41 @@ resource "azurerm_network_interface" "example-ua" {
   tags = var.common_tags
 }
 
+
+resource "azurerm_network_security_group" "example" {
+  name                = "example-nsg"
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
+
+  tags = var.common_tags
+}
+
+resource "azurerm_network_security_rule" "example" {
+  name                        = "SSH"
+  priority                    = 100
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "22"
+  destination_port_range      = "22"
+  source_address_prefix       = "*"
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.example.name
+  network_security_group_name = azurerm_network_security_group.example.name
+}
+
+
+resource "azurerm_network_interface_security_group_association" "example-ua" {
+  network_interface_id      = azurerm_network_interface.example-ua.id
+  network_security_group_id = azurerm_network_security_group.example.id
+}
+
+resource "azurerm_network_interface_security_group_association" "example-rg" {
+  network_interface_id      = azurerm_network_interface.example-rg.id
+  network_security_group_id = azurerm_network_security_group.example.id
+}
+
+
 resource "azurerm_linux_virtual_machine" "example-rg" {
   name                = "example-machine-in-rg"
   resource_group_name = azurerm_resource_group.example.name
@@ -134,7 +169,7 @@ resource "azurerm_linux_virtual_machine" "example-rg" {
   tags = var.common_tags
 }
 
-resource "azurerm_linux_virtual_machine" "example-ua" { # 39196f8c-6a93-4010-abcd-50ddc93e52bf
+resource "azurerm_linux_virtual_machine" "example-ua" { # 39196f8c-6a93-4010-abcd-50ddc93e52bf 
   name                = "example-machine-in-ua"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
@@ -162,7 +197,7 @@ resource "azurerm_linux_virtual_machine" "example-ua" { # 39196f8c-6a93-4010-abc
   }
 
   identity {
-    type         = "SystemAssigned, UserAssigned"
+    type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.example.id]
   }
   tags = var.common_tags

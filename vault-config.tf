@@ -16,12 +16,22 @@ variable "azure_tenant_id" {
   description = "The tenant id for the Azure Active Directory organization"
 }
 
+variable "azure_client_id" {
+  type        = string
+  description = ""
+}
+
+variable "azure_client_secret" {
+  type        = string
+  description = ""
+}
+
 resource "vault_azure_auth_backend_config" "example" {
-  backend   = vault_auth_backend.example.path
-  tenant_id = var.azure_tenant_id
-  # client_id     = "11111111-2222-3333-4444-555555555555"
-  # client_secret = "01234567890123456789"
-  resource = "https://management.azure.com/"
+  backend       = vault_auth_backend.example.path
+  tenant_id     = var.azure_tenant_id
+  client_id     = var.azure_client_id
+  client_secret = var.azure_client_secret
+  resource      = "https://management.azure.com/"
 }
 
 resource "vault_azure_auth_backend_role" "user-assigned-role" {
