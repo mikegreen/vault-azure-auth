@@ -209,6 +209,8 @@ resource "azurerm_linux_virtual_machine" "example-ua" { # 39196f8c-6a93-4010-abc
   tags = var.common_tags
 }
 
+# create a role to read VM metadata for the Vault server to use 
+# https://www.vaultproject.io/docs/auth/azure#prerequisites
 resource "azurerm_role_definition" "vault-vm-read" {
   name        = "vault-vm-read"
   scope       = data.azurerm_subscription.current.id
@@ -224,7 +226,7 @@ resource "azurerm_role_definition" "vault-vm-read" {
     azurerm_resource_group.example.id,
   ]
 }
-
+# assign role to the Enterprise Application 
 resource "azurerm_role_assignment" "example" {
   # name  = "00000000-0000-0000-0000-000000000000"
   scope                = azurerm_resource_group.example.id
